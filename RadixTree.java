@@ -15,7 +15,7 @@ public class RadixTree {
   }
 
   private String lookupHelper(String word, Node n) {
-    if (word.equals("")) {
+    if (word.length() == 0) {
       return "";
     }
 
