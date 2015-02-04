@@ -1,6 +1,5 @@
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
 
 /* A Radix Tree for words or something */
 
