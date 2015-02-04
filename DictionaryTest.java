@@ -3,12 +3,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
-public class RadixTreeTest {
+public class DictionaryTest {
   @Test
   public void testAdd() {
     String word = "abc";
-    RadixTree rt = new RadixTree();
-    rt.add(word);
+    Dictionary rt = new Dictionary();
+    rt.add(word, 10);
     assertEquals(rt.lookup("abc"), word);
   }
 }
