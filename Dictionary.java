@@ -1,6 +1,12 @@
 import java.util.List;
 import java.util.ArrayList;
 
+import java.nio.file.Path;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+
+import java.io.IOException;
+
 /*
  * A Radix tree implementation, with every edge representing just
  * a single character.
@@ -10,6 +16,17 @@ public class Dictionary {
 
   public Dictionary() {
     root = new Node(null);
+  }
+
+  public void loadFile(Path file, Charset encoding) throws IOException {
+    List<String> lines = Files.readAllLines(file, encoding);
+    for (String line : lines) {
+      String[] parts = line.split(" ");
+      String word = parts[0];
+      String val  = parts[1];
+      int value   = Integer.parseInt(val);
+      add(word, value);
+    }
   }
 
   // Given a certain input, find the best matching word.
