@@ -6,6 +6,10 @@ import java.util.ArrayList;
 public class RadixTree {
   private Node root;
 
+  public RadixTree() {
+    root = new Node(null);
+  }
+
   public String lookup(String word) {
     return lookupHelper(word, root);
   }
@@ -30,7 +34,7 @@ public class RadixTree {
   }
 
   private void addHelper(String word, Node n) {
-    if (word == "") {
+    if (word.length() == 0) {
       return;
     }
 
@@ -68,9 +72,10 @@ public class RadixTree {
     private List<Edge> edges;
     
     public Node (List<Edge> edges) {
-      this.edges = edges;
       if (edges == null) {
-        edges = new ArrayList<Edge>();
+        this.edges = new ArrayList<Edge>();
+      } else {
+        this.edges = edges;
       }
     }
 
