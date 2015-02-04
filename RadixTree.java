@@ -26,12 +26,29 @@ public class RadixTree {
     return "";
   }
 
-  public void add(String s) {
-
+  public void add(String word) {
+    addHelper(word, root);
   }
 
-  private void addHelper(String s, Node n) {
+  private void addHelper(String word, Node n) {
+    if (word == "") {
+      return;
+    }
 
+    char   head = word.charAt(0);
+    String tail = word.length() > 0 ? word.substring(1) : "" ;
+    for (Edge e : n.edges) {
+      if (e.correspondsTo(head)) {
+        // We found a match, add the tail to that match
+        addHelper(tail, e.next);
+        return;
+      }
+    }
+    // No match found. Create a new Edge with this char!
+    Node newNext = new Node(null);
+    Edge newEdge = new Edge(head, newNext);
+    n.edges.add(newEdge);
+    addHelper(tail, newNext);
   }
 
   private class Edge {
