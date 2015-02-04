@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 
+import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -16,6 +17,66 @@ public class Dictionary {
 
   public Dictionary() {
     root = new Node(null);
+  }
+
+  // Main program!
+  // The first thing we do is to determine how long words to look for!
+  // This is done by parsing the three program arguments:
+
+  // args[0]:
+  // The first argument is always necessary, and is the word we will
+  // try to build new words from. This will usually be 
+  // "optimizationmatters", but who knows, right?
+
+  // args[1]:
+  // The second argument is the maximum length of words we will try to
+  // find. For example, if args[1] == 3, we will only look for words of
+  // length 3 or less.
+  private static int DEFAULT_MAX_LENGTH = 3;
+
+  // args[2]:
+  // The third argument is the minimum length of words we will try to
+  // find. For example, if args[2] == 3, we will only look for words of
+  // length 3 or more.
+  private static int DEFAULT_MIN_LENGTH = 1;
+  public static void main(String... args) {
+    // This is all parsing...
+    if (args.length == 0 || args.length > 3) {
+      printUsageHint();
+    }
+
+    String word;
+    int max;
+    int min;
+
+    try {
+      word = args[0];
+
+      if (args.length > 1) {
+        max = Integer.parseInt(args[1]);
+      } else {
+        max = DEFAULT_MAX_LENGTH;
+      }
+
+      if (args.length > 2) {
+        min = Integer.parseInt(args[2]);
+      } else {
+        min = DEFAULT_MIN_LENGTH;
+      }
+    } catch (NumberFormatException nfe) {
+      printUsageHint();
+    }
+
+    // Parsing over, calculations ensue!
+    // This will basically be done by a breadth-first search through the
+    // radix tree
+  }
+
+  public static void printUsageHint() {
+    System.out.println("Usage:   java Dictionary <input word> [max length (default: " + DEFAULT_MAX_LENGTH + ")] [min length (default: " + DEFAULT_MIN_LENGTH + ")]");
+    System.out.println("Example: java Dictionary \"optimizationmatters\" 3  3 ");
+    System.out.println("Example: java Dictionary \"optimizationmatters\" 19 1 ");
+    System.out.println("Example: java Dictionary \"optimizationmatters\" 3 ");
   }
 
   public void loadFile(Path file, Charset encoding) throws IOException {

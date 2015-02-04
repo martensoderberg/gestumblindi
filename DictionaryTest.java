@@ -22,15 +22,17 @@ public class DictionaryTest {
 
   @Test
   public void testLoad() {
-    Dictionary d = new Dictionary();
+    // TODO: Handle the case of when UTF-8 is not available...
+    // ...or how likely is that, really?
     SortedMap<String, Charset> ac = Charset.availableCharsets();
     Charset encoding = ac.get("UTF-8");
     Path path = Paths.get("res/en.txt");
     try {
+      Dictionary d = new Dictionary();
       d.loadFile(path, encoding);
+      assertEquals("cat", d.lookup("cat"));
     } catch (IOException e) {
-
+      // TODO: Handle this...
     }
-    assertEquals("cat", d.lookup("cat"));
   }
 }
