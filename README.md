@@ -13,3 +13,5 @@ The program is not case sensitive, and will treat "thisword" and "THISWORD" as t
 Compile: `javac Main.java`
 
 Run:     `java  Main "YourWord" [max anagram length] [min anagram length]`
+
+Note that the list of words used to build the dictionary (res/en.txt) is not very good. It contains a lot of entries that are not really words in the English language, such as 'p'. So it contains a lot of false words, which is why the output will sometimes seem absurd.
