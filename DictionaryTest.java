@@ -5,6 +5,11 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Set;
 
+/* Some test cases for the Dictionary class.
+ * Note that these extensively use the "exists" method, this is in order
+ * to ensure that the add method works as expected (and that the line of
+ * thinking when it comes to the general recursion isn't entirely crazy)
+ */
 public class DictionaryTest {
   @Test
   public void testAdd() {
@@ -45,13 +50,30 @@ public class DictionaryTest {
   public void testSearch() {
     Dictionary d    = new Dictionary();
 
-    // Note the ' at the end of the alphabet string:
+    // Note the ' at the end of the alphabet string.
+    // (Special characters should be no problem)
     String alphabet = "abcdefghijklmnopqrstuvwxyz'";
-    String[] words  = {"what", "is", "love", "baby", "don't", "hurt", "me", "no", "mooore"};
+    String[] words  =
+    {  "what"  ,
+       "is"    ,
+       "love"  ,
+       "baby"  ,
+       "don't" ,
+       "hurt"  ,
+       "me"    ,
+       "no"    ,
+       "mooore"
+     };
+
     for (String word : words) {
       d.add(word);
     }
+
+    // Find all words, 20 characters or less, that exist in the
+    // dictionary and can be formed with the letters of the alphabet
+    // (using each character at most once).
     Set result = d.search(alphabet, 20, 0);
+
     assertTrue  (result.contains("what"));
     assertTrue  (result.contains("is"  ));
     assertTrue  (result.contains("love"));
@@ -70,5 +92,18 @@ public class DictionaryTest {
     result.remove("me");
     result.remove("no");
     assertTrue("The result set should be empty, all okay results should have been removed", result.isEmpty());
+  }
+
+  // If maxLength < minLength, we should always just get an empty set
+  // (and this should be done rather quickly)
+  @Test()
+  public void testSearch_invalidInput() {
+    Dictionary d = new Dictionary();
+    String word = "cheese";
+    int max = 5;
+    int min = 10;
+    d.add("cheese");
+    Set<String> result = d.search(word, max, min);
+    assertTrue("max < min not handled correctly", result.isEmpty());
   }
 }
