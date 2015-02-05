@@ -14,8 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /*
- * A Radix tree implementation, with every edge representing just
- * a single character.
  */
 public class Dictionary {
   private Node root;
@@ -42,7 +40,7 @@ public class Dictionary {
       String theRest  = removeCharAt(word, i);
       Node   next     = n.edges.get(new Character(nextStep));
       if (next != null) {
-        if (stepsTaken >= minSteps && next.value != -1) {
+        if (stepsTaken >= minSteps && next.word != null) {
           // If we have taken enough steps, and this is a real word, 
           // add it to the results!
           searchResults.add(next.word);
@@ -58,26 +56,25 @@ public class Dictionary {
     return buf.toString();
   }
 
+  // loadFile takes in a file and an encoding, reads it and stores
+  // every word in this dictionary.
+  // Assumption: the input file has exactly one word per line
   public void loadFile(Path file, Charset encoding) throws IOException {
     List<String> lines = Files.readAllLines(file, encoding);
-    for (String line : lines) {
-      String[] parts = line.split(" ");
-      String word = parts[0];
-      String val  = parts[1];
-      int value   = Integer.parseInt(val);
-      add(word, value);
+    for (String word : lines) {
+      add(word);
     }
   }
 
-  // Given a certain input, find the best matching word.
-  public String lookup(String word) {
-    return lookupHelper(word, root);
+  // Given a certain input, does it exist in our data structure?
+  public boolean exists(String word) {
+    return existsHelper(word, root);
   }
 
   // Recursive helper function for lookup.
-  private String lookupHelper(String word, Node n) {
+  private boolean existsHelper(String word, Node n) {
     if (word.length() == 0) {
-      return "";
+      return (n.word != null);
     }
 
     char   head = word.charAt(0);
@@ -86,24 +83,24 @@ public class Dictionary {
     if (next != null) {
       // We found such an edge, let's continue
       String tail = word.substring(1);
-      return head + lookupHelper(tail, next);
+      return existsHelper(tail, next);
     } else {
       // No such edge, the word does not exist, we cannot go further
-      return "";
+      return false;
     }
   }
 
-  public void add(String word, int value) {
+  public void add(String word) {
     word = word.toLowerCase();
-    addHelper(word, value, word, root);
+    addHelper(word, word, root);
   }
 
-  private void addHelper(String word, int value, String wholeWord, Node n) {
+  private void addHelper(String word, String wholeWord, Node n) {
     if (word.length() == 0) {
       // We have entered the whole word into the tree.
-      // This last node should therefore have the value of the word.
+      // This last word should therefore store the full word.
+      // This way, we know that this node represents a full word.
       n.word  = wholeWord;
-      n.value = value;
       return;
     }
 
@@ -116,12 +113,11 @@ public class Dictionary {
       Character c  = new Character(head);
       n.edges.put(c, next);
     }
-    addHelper(tail, value, wholeWord, next);
+    addHelper(tail, wholeWord, next);
   }
 
   private class Node {
     private Map<Character, Node>  edges;
-    private int                   value;
     private String                word;
     
     private Node () {
@@ -132,7 +128,6 @@ public class Dictionary {
       // While "banana" is a word, "bana" is not a word, and thus the
       // node given by following "b" -> "a" -> "n" -> "a" should not give
       // a word result.
-      this.value = -1;
       this.word  = null;
     }
   }

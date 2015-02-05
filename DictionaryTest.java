@@ -16,8 +16,9 @@ public class DictionaryTest {
   public void testAdd() {
     String word = "abc";
     Dictionary d = new Dictionary();
-    d.add(word, 10);
-    assertEquals(word, d.lookup("abc"));
+    d.add(word);
+    assertTrue("Words are not correctly added!", 
+                d.exists("abc"));
   }
 
   @Test
@@ -27,10 +28,12 @@ public class DictionaryTest {
     SortedMap<String, Charset> ac = Charset.availableCharsets();
     Charset encoding = ac.get("UTF-8");
     Path path = Paths.get("res/en.txt");
+    
     try {
       Dictionary d = new Dictionary();
       d.loadFile(path, encoding);
-      assertEquals("cat", d.lookup("cat"));
+      assertTrue("the word \"cat\" was not found in the dictionary",
+                 d.exists("cat"));
     } catch (IOException e) {
       // TODO: Handle this...
     }
