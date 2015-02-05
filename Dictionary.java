@@ -24,14 +24,21 @@ public class Dictionary {
   }
 
   public Set<String> search(String word, int maxLength, int minLength) {
-    searchResults = new HashSet<String>();
     word = word.toLowerCase();
+    searchResults = new HashSet<String>();
     searchHelper(word, 0, maxLength, minLength, root);
     return searchResults;
   }
 
   private void searchHelper(String word, int stepsTaken, int maxSteps, int minSteps, Node n) {
+    if (stepsTaken >= minSteps && n.word != null) {
+      // If we have taken enough steps, and this is a real word,
+      // add it to the results!
+      searchResults.add(n.word);
+    }
+
     if (stepsTaken >= maxSteps) {
+      // If we shouldn't be stepping any longer, stop here.
       return;
     }
 
@@ -40,11 +47,7 @@ public class Dictionary {
       String theRest  = removeCharAt(word, i);
       Node   next     = n.edges.get(new Character(nextStep));
       if (next != null) {
-        if (stepsTaken >= minSteps && next.word != null) {
-          // If we have taken enough steps, and this is a real word, 
-          // add it to the results!
-          searchResults.add(next.word);
-        }
+        // For all possible edges, keep stepping!
         searchHelper(theRest, stepsTaken+1, maxSteps, minSteps, next);
       }
     }
