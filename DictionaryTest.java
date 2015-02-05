@@ -47,7 +47,7 @@ public class DictionaryTest {
   }
 
   @Test
-  public void testSearch() {
+  public void testFindAnagrams() {
     Dictionary d    = new Dictionary();
 
     // Note the ' at the end of the alphabet string.
@@ -96,8 +96,8 @@ public class DictionaryTest {
 
   // If maxLength < minLength, we should always just get an empty set
   // (and this should be done rather quickly)
-  @Test()
-  public void testSearch_invalidInput() {
+  @Test
+  public void testFindAnagrams_invalidInput() {
     Dictionary d = new Dictionary();
     String word = "cheese";
     int max = 5;
@@ -105,5 +105,17 @@ public class DictionaryTest {
     d.add("cheese");
     Set<String> result = d.findAnagrams(word, max, min);
     assertTrue("max < min not handled correctly", result.isEmpty());
+  }
+
+  // removeCharAt is supposed to be a complement to charAt, removing the
+  // char that would've been given by charAt from the string.
+  @Test
+  public void testRemoveCharAt() {
+    String str = "abcdefghijklmnopqrstuvwxyz";
+    for (int i = 0; i < str.length(); i++) {
+      char   c        = str.charAt(i);
+      String cRemoved = Dictionary.removeCharAt(str, i);
+      assertFalse(cRemoved + " contains the char " + c + " even though it shouldn't", cRemoved.contains("" + c));
+    }
   }
 }
