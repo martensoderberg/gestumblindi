@@ -1,12 +1,15 @@
 import java.util.List;
 import java.util.ArrayList;
-
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.SortedMap;
 
 import java.io.IOException;
+
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /*
  * A Radix tree implementation, with every edge representing just
@@ -14,69 +17,43 @@ import java.io.IOException;
  */
 public class Dictionary {
   private Node root;
+  private List<String> searchResults;
 
   public Dictionary() {
-    root = new Node(null);
+    root = new Node();
   }
 
-  // Main program!
-  // The first thing we do is to determine how long words to look for!
-  // This is done by parsing the three program arguments:
-
-  // args[0]:
-  // The first argument is always necessary, and is the word we will
-  // try to build new words from. This will usually be 
-  // "optimizationmatters", but who knows, right?
-
-  // args[1]:
-  // The second argument is the maximum length of words we will try to
-  // find. For example, if args[1] == 3, we will only look for words of
-  // length 3 or less.
-  private static int DEFAULT_MAX_LENGTH = 3;
-
-  // args[2]:
-  // The third argument is the minimum length of words we will try to
-  // find. For example, if args[2] == 3, we will only look for words of
-  // length 3 or more.
-  private static int DEFAULT_MIN_LENGTH = 1;
-  public static void main(String... args) {
-    // This is all parsing...
-    if (args.length == 0 || args.length > 3) {
-      printUsageHint();
-    }
-
-    String word;
-    int max;
-    int min;
-
-    try {
-      word = args[0];
-
-      if (args.length > 1) {
-        max = Integer.parseInt(args[1]);
-      } else {
-        max = DEFAULT_MAX_LENGTH;
-      }
-
-      if (args.length > 2) {
-        min = Integer.parseInt(args[2]);
-      } else {
-        min = DEFAULT_MIN_LENGTH;
-      }
-    } catch (NumberFormatException nfe) {
-      printUsageHint();
-    }
-
-    // Parsing over, calculations ensue!
-    // This will basically be done by a breadth-first search through the
-    // radix tree
+  public List<String> search(String word, int maxLength, int minLength) {
+    searchResults = new ArrayList<String>();
+    word = word.toLowerCase();
+    searchHelper(word, 0, maxLength, minLength, root);
+    return searchResults;
   }
 
-  public static void printUsageHint() {
-    System.out.println("Usage:   java Dictionary <input word> [max length (default: " + DEFAULT_MAX_LENGTH + ")] [min length (default: " + DEFAULT_MIN_LENGTH + ")]");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 3  3 ");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 19 1 ");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 3 ");
+  private void searchHelper(String word, int stepsTaken, int maxSteps, int minSteps, Node n) {
+    if (stepsTaken >= maxSteps) {
+      return;
+    }
+
+    for (int i = 0; i < word.length(); i++) {
+      char   nextStep = word.charAt(i);
+      String theRest  = removeCharAt(word, i);
+      Node   next     = n.edges.get(new Character(nextStep));
+      if (next != null) {
+        if (stepsTaken >= minSteps && next.value != -1) {
+          // If we have taken enough steps, and this is a real word, 
+          // add it to the results!
+          searchResults.add(next.word);
+        }
+        searchHelper(theRest, stepsTaken+1, maxSteps, minSteps, next);
+      }
+    }
+  }
+
+  public static String removeCharAt(String s, int i) {
+    StringBuffer buf = new StringBuffer(s.length() - 1);
+    buf.append(s.substring(0, i)).append(s.substring(i+1));
+    return buf.toString();
   }
 
   public void loadFile(Path file, Charset encoding) throws IOException {
@@ -102,69 +79,59 @@ public class Dictionary {
     }
 
     char   head = word.charAt(0);
-    String tail = word.length() > 0 ? word.substring(1) : "" ;
-    for (Edge e : n.edges) {
-      if (e.correspondsTo(head)) {
-        return head + lookupHelper(tail, e.next);
-      }
+    // (try to) retrieve the next edge
+    Node   next = n.edges.get(new Character(head));
+    if (next != null) {
+      // We found such an edge, let's continue
+      String tail = word.substring(1);
+      return head + lookupHelper(tail, next);
+    } else {
+      // No such edge, the word does not exist, we cannot go further
+      return "";
     }
-    return "";
   }
 
   public void add(String word, int value) {
-    addHelper(word, value, root);
+    word = word.toLowerCase();
+    addHelper(word, value, word, root);
   }
 
-  private void addHelper(String word, int value, Node n) {
+  private void addHelper(String word, int value, String wholeWord, Node n) {
     if (word.length() == 0) {
       // We have entered the whole word into the tree.
       // This last node should therefore have the value of the word.
+      n.word  = wholeWord;
       n.value = value;
       return;
     }
 
+    String tail = word.substring(1);
     char   head = word.charAt(0);
-    String tail = word.length() > 0 ? word.substring(1) : "" ;
-    for (Edge e : n.edges) {
-      if (e.correspondsTo(head)) {
-        // We found a match, add the tail to that match
-        addHelper(tail, value, e.next);
-        return;
-      }
+    Node   next = n.edges.get(new Character(head));
+    if (next == null) {
+      // No match found. Create a new Edge with this char!
+      next = new Node();
+      Character c  = new Character(head);
+      n.edges.put(c, next);
     }
-    // No match found. Create a new Edge with this char!
-    Node newNext = new Node(null);
-    Edge newEdge = new Edge(head, newNext);
-    n.edges.add(newEdge);
-    addHelper(tail, value, newNext);
-  }
-
-  private class Edge {
-    private char c;
-    private Node next;
-    
-    private Edge(char c, Node next) {
-      this.c     = c;
-      this.next  = next;
-    }
-
-    private boolean correspondsTo(char c) {
-      return (this.c == c);
-    }
+    addHelper(tail, value, wholeWord, next);
   }
 
   private class Node {
-    private List<Edge> edges;
-    private int        value;
+    private Map<Character, Node>  edges;
+    private int                   value;
+    private String                word;
     
-    private Node (List<Edge> edges) {
-      if (edges == null) {
-        this.edges = new ArrayList<Edge>();
-      } else {
-        this.edges = edges;
-      }
+    private Node () {
+      // Note: Character.hashCode() == Character.hashValue()
+      this.edges = new HashMap<Character, Node>();
 
+      // By default, a node represents no word.
+      // While "banana" is a word, "bana" is not a word, and thus the
+      // node given by following "b" -> "a" -> "n" -> "a" should not give
+      // a word result.
       this.value = -1;
+      this.word  = null;
     }
   }
 }
