@@ -1,5 +1,5 @@
 import java.util.SortedMap;
-import java.util.List;
+import java.util.Set;
 
 import java.io.IOException;
 
@@ -80,16 +80,16 @@ public class Main {
     }
 
     // I/O stuff is dealt with! Let the breadth-first searching ensue!
-    List<String> results = d.search(word, max, min);
+    Set<String> results = d.search(word, max, min);
     for (String s : results) {
       System.out.println(s);
     }
   }
 
   public static void printUsageHint() {
-    System.out.println("Usage:   java Dictionary <input word> [max length (default: " + DEFAULT_MAX_LENGTH + ")] [min length (default: " + DEFAULT_MIN_LENGTH + ")]");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 3  3 ");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 19 1 ");
-    System.out.println("Example: java Dictionary \"optimizationmatters\" 3 ");
+    System.out.println("Usage:   java Main <input word> [max length (default: " + DEFAULT_MAX_LENGTH + ")] [min length (default: " + DEFAULT_MIN_LENGTH + ")]");
+    System.out.println("Example: java Main \"optimizationmatters\" 3  3 ");
+    System.out.println("Example: java Main \"optimizationmatters\" 19 1 ");
+    System.out.println("Example: java Main \"optimizationmatters\" 3 ");
   }
 }

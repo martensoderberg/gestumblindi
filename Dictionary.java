@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.SortedMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import java.io.IOException;
 
@@ -17,14 +19,14 @@ import java.nio.file.Paths;
  */
 public class Dictionary {
   private Node root;
-  private List<String> searchResults;
+  private Set<String> searchResults;
 
   public Dictionary() {
     root = new Node();
   }
 
-  public List<String> search(String word, int maxLength, int minLength) {
-    searchResults = new ArrayList<String>();
+  public Set<String> search(String word, int maxLength, int minLength) {
+    searchResults = new HashSet<String>();
     word = word.toLowerCase();
     searchHelper(word, 0, maxLength, minLength, root);
     return searchResults;
