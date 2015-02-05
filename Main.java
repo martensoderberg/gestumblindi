@@ -21,7 +21,7 @@ public class Main {
   // The second argument is the maximum length of words we will try to
   // find. For example, if args[1] == 3, we will only look for words of
   // length 3 or less.
-  private static int DEFAULT_MAX_LENGTH = 3;
+  private static int DEFAULT_MAX_LENGTH = 20;
 
   // args[2]:
   // The third argument is the minimum length of words we will try to
