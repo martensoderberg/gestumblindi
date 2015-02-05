@@ -4,12 +4,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 
-import java.io.IOException;
-
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 /* This implementation stores a dictionary in a radix tree to quickly
  * find anagrams of given lengths.
  */
@@ -59,16 +53,6 @@ public class Dictionary {
     StringBuffer buf = new StringBuffer(s.length() - 1);
     buf.append(s.substring(0, i)).append(s.substring(i+1));
     return buf.toString();
-  }
-
-  // loadFile takes in a file and an encoding, reads it and stores
-  // every word in this dictionary.
-  // Assumption: the input file has exactly one word per line
-  public void loadFile(Path file, Charset encoding) throws IOException {
-    List<String> lines = Files.readAllLines(file, encoding);
-    for (String word : lines) {
-      add(word);
-    }
   }
 
   // Given a certain input, does it exist in our data structure?

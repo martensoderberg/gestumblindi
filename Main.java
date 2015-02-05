@@ -1,12 +1,16 @@
 import java.util.SortedMap;
 import java.util.Set;
+import java.util.List;
 
 import java.io.IOException;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/* This program handles all that pesky I/O.
+ */
 public class Main {
   // Main program!
   // The first thing we do is to determine how long words to look for!
@@ -72,7 +76,7 @@ public class Main {
       SortedMap<String, Charset> ac = Charset.availableCharsets();
       Charset encoding = ac.get("UTF-8");
       Path path = Paths.get("res/en.txt");
-      d.loadFile(path, encoding);
+      loadFile(d, path, encoding);
     } catch (IOException e) {
       // TODO improve error message
       System.err.println("ERROR: Could not load dictionary file!");
@@ -91,5 +95,16 @@ public class Main {
     System.out.println("Example: java Main \"optimizationmatters\" 3  3 ");
     System.out.println("Example: java Main \"optimizationmatters\" 19 1 ");
     System.out.println("Example: java Main \"optimizationmatters\" 3 ");
+  }
+
+
+  // loadFile takes in a Dictionary, a file and an encoding, reads the
+  // file and stores every word in the given dictionary.
+  // Assumption: the input file has exactly one word per line
+  public static void loadFile(Dictionary dict, Path file, Charset encoding) throws IOException {
+    List<String> lines = Files.readAllLines(file, encoding);
+    for (String word : lines) {
+      dict.add(word);
+    }
   }
 }
