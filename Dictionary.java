@@ -10,7 +10,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/*
+/* This implementation stores a dictionary in a radix tree to quickly
+ * find anagrams of given lengths.
  */
 public class Dictionary {
   private Node root;
@@ -20,14 +21,18 @@ public class Dictionary {
     root = new Node();
   }
 
-  public Set<String> search(String word, int maxLength, int minLength) {
-    word = word.toLowerCase();
+  public Set<String> findAnagrams(String word, int maxLength, int minLength) {
     searchResults = new HashSet<String>();
-    searchHelper(word, 0, maxLength, minLength, root);
+    if (maxLength >= minLength) {
+      // Only do something if max >= min. Otherwise, just return empty.
+      // (it is pointless to do anything if max < min)
+      word = word.toLowerCase();
+      findAnagramsHelper(word, 0, maxLength, minLength, root);
+    }
     return searchResults;
   }
 
-  private void searchHelper(String word, int stepsTaken, int maxSteps, int minSteps, Node n) {
+  private void findAnagramsHelper(String word, int stepsTaken, int maxSteps, int minSteps, Node n) {
     if (stepsTaken >= minSteps && n.word != null) {
       // If we have taken enough steps, and this is a real word,
       // add it to the results!
@@ -45,7 +50,7 @@ public class Dictionary {
       Node   next     = n.edges.get(new Character(nextStep));
       if (next != null) {
         // For all possible edges, keep stepping!
-        searchHelper(theRest, stepsTaken+1, maxSteps, minSteps, next);
+        findAnagramsHelper(theRest, stepsTaken+1, maxSteps, minSteps, next);
       }
     }
   }

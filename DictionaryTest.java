@@ -72,7 +72,7 @@ public class DictionaryTest {
     // Find all words, 20 characters or less, that exist in the
     // dictionary and can be formed with the letters of the alphabet
     // (using each character at most once).
-    Set result = d.search(alphabet, 20, 0);
+    Set result = d.findAnagrams(alphabet, 20, 0);
 
     assertTrue  (result.contains("what"));
     assertTrue  (result.contains("is"  ));
@@ -103,7 +103,7 @@ public class DictionaryTest {
     int max = 5;
     int min = 10;
     d.add("cheese");
-    Set<String> result = d.search(word, max, min);
+    Set<String> result = d.findAnagrams(word, max, min);
     assertTrue("max < min not handled correctly", result.isEmpty());
   }
 }

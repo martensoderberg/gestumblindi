@@ -79,8 +79,8 @@ public class Main {
       return;
     }
 
-    // I/O stuff is dealt with! Let the breadth-first searching ensue!
-    Set<String> results = d.search(word, max, min);
+    // I/O stuff is dealt with! Now we just search.
+    Set<String> results = d.findAnagrams(word, max, min);
     for (String s : results) {
       System.out.println(s);
     }
