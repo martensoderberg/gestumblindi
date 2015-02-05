@@ -9,8 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/* This program handles all that pesky I/O.
- */
+/* This program handles all that pesky I/O */
 public class Main {
   // Main program!
   // The first thing we do is to determine how long words to look for!
@@ -96,7 +95,6 @@ public class Main {
     System.out.println("Example: java Main \"optimizationmatters\" 19 1 ");
     System.out.println("Example: java Main \"optimizationmatters\" 3 ");
   }
-
 
   // loadFile takes in a Dictionary, a file and an encoding, reads the
   // file and stores every word in the given dictionary.
