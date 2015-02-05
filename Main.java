@@ -70,6 +70,7 @@ public class Main {
 
     // Now we load the dictionary from a file and add all of that to our
     // nifty radix tree implementation.
+    long fileStartTime = System.nanoTime();
     Dictionary d = new Dictionary();
     try {
       SortedMap<String, Charset> ac = Charset.availableCharsets();
@@ -81,12 +82,22 @@ public class Main {
       System.err.println("ERROR: Could not load dictionary file!");
       return;
     }
+    long fileStopTime = System.nanoTime();
+    long fileReadDuration = fileStopTime - fileStartTime;
+
 
     // I/O stuff is dealt with! Now we just search.
+    long queryStartTime = System.nanoTime();
     Set<String> results = d.findAnagrams(word, max, min);
+    long queryStopTime  = System.nanoTime();
+    long queryDuration  = queryStopTime - queryStartTime;
     for (String s : results) {
       System.out.println(s);
     }
+    System.out.println("");
+    System.out.println("Done!");
+    System.out.println("Reading   the file  took " + fileReadDuration + "\tnanoseconds");
+    System.out.println("Executing the query took " + queryDuration + "\tnanoseconds");
   }
 
   public static void printUsageHint() {
