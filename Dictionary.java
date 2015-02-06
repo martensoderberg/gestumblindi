@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -19,6 +18,14 @@ public class Dictionary {
     root = new Node();
   }
 
+  /* Where the magic happens.
+   * We perform a breadth-first search through the radix tree, at every
+   * node taking every step that is possible, while keeping in mind which
+   * characters we have 'used up' in getting there. Or rather, we keep in
+   * mind which characters we can still use.
+   *
+   * Uses the internal PartialAnagram class to perform the search.
+   */
   public List<String> findAnagrams(String word, int maxLength, int minLength) {
     searchResults = new ArrayList<String>();
 
@@ -29,17 +36,19 @@ public class Dictionary {
 
     int originalSize = word.length();
 
+    // Convert the word into a list of characters.
     char[] ca = word.toCharArray();
-    Arrays.sort(ca);
     List<Character> cl = new ArrayList<Character>();
     for (char c : ca) {
       cl.add(new Character(c));
     }
 
+    // Set up the queue
     Queue<PartialAnagram> pq = new PriorityQueue<PartialAnagram>();
-    PartialAnagram first = new PartialAnagram(cl, root);
+    PartialAnagram first = new PartialAnagram(cl, root, 0);
     pq.add(first);
 
+    // Set up is done, let the searching commence
     while (!pq.isEmpty()) {
       PartialAnagram pa = pq.poll();
       Node n = pa.next;
@@ -47,30 +56,29 @@ public class Dictionary {
 
       int stepsTaken = originalSize - remaining.size();
       if (stepsTaken >= minLength && n.word != null) {
-        // 1) Have we reached a node with a result?
+        // Have we reached a node with a result?
         searchResults.add(n.word);
       }
 
       if (stepsTaken >= maxLength) {
-        // 2) If we shouldn't be stepping any longer, stop here.
+        // If we shouldn't be stepping any longer, stop here.
         continue;
       }
 
-      // 3:
+      // This is where we step to new nodes!
       // pick c from _unique_ elements in remaining
       Set<Character> uniqueRemaining = new HashSet<Character>(remaining);
       for (Character c : uniqueRemaining) {
         Node next = n.edges.get(c);
         if (next != null) {
-          // TODO: write this comment
-          // Trim branches by only stepping into certain leaves
-          if (next.furthestLeaf < (minLength - stepsTaken)) {
+          // We only wish to step into a branch if we have any hope
+          // of finding what we seek in there.
+          // (For example, this means that if we get a query for all
+          // anagrams of length > 50, we won't be looking through any
+          // entries as no branch will be that deep)
+          if ((next.furthestLeaf < (minLength - stepsTaken)) ||
+              (next.closestLeaf  > (maxLength - stepsTaken))) {
             // Skip this node
-            continue;
-          }
-
-          if (next.closestLeaf > (maxLength - stepsTaken)) {
-            // dito
             continue;
           }
 
@@ -79,31 +87,15 @@ public class Dictionary {
           List<Character> theRest = new ArrayList<Character>(remaining);
           // Remove the first occurence of c in theRest
           theRest.remove(c);
-          PartialAnagram newPA = new PartialAnagram(theRest, next);
+          int cs = pa.charSum + c.charValue();
+          PartialAnagram newPA = new PartialAnagram(theRest, next, cs);
           pq.add(newPA);
         }
       }
-    }
+    } // end of while loop
     
+    // No more entries in our queue - we are done.
     return searchResults;
-  }
-
-  private class PartialAnagram implements Comparable<PartialAnagram> {
-    private List<Character> remaining;
-    private Node            next;
-    
-    private PartialAnagram(List<Character> remaining, Node next) {
-      this.remaining = remaining;
-      this.next      = next;
-    }
-
-    public int compareTo(PartialAnagram other) {
-      if (other == null) {
-        return 1;
-      }
-
-      return (other.remaining.size() - this.remaining.size());
-    }
   }
 
   // This helper function works as a complement to String.charAt,
@@ -213,6 +205,43 @@ public class Dictionary {
       // it makes no sense to go down a branch with depth < 10.
       this.closestLeaf  = Integer.MAX_VALUE;
       this.furthestLeaf = 0;
+    }
+  }
+
+  // Internal representation of a partial anagram - a stepping stone on
+  // the way to actually finding anagrams.
+  // These are stored in the PriorityQueue used in findAnagrams, and as
+  // such, they are compared to each other!
+  // Since we would like our output to be sorted, we make that happen
+  // here.
+  private class PartialAnagram implements Comparable<PartialAnagram> {
+    private List<Character> remaining;
+    private Node            next;
+    private int             charSum;
+
+    private PartialAnagram(List<Character> remaining,
+                           Node next,
+                           int charSum) {
+      this.remaining = remaining;
+      this.next      = next;
+      this.charSum   = charSum;
+    }
+
+    // Sorting order:
+    // Primarily, we wish to evaluate PAs with more remaining nodes
+    // Secondarily, we wish to evaluate PAs in alphabetical order
+    public int compareTo(PartialAnagram other) {
+      if (other == null) {
+        return 1;
+      }
+
+      if        (other.remaining.size() > this.remaining.size()) {
+        return 1;
+      } else if (other.remaining.size() < this.remaining.size()) {
+        return -1;
+      } else { // They are equal
+        return this.charSum - other.charSum;
+      }
     }
   }
 }
