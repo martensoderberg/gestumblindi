@@ -1,5 +1,4 @@
 import java.util.SortedMap;
-import java.util.Set;
 import java.util.List;
 
 import java.io.IOException;
@@ -88,7 +87,7 @@ public class Main {
 
     // I/O stuff is dealt with! Now we just search.
     long queryStartTime = System.nanoTime();
-    Set<String> results = d.findAnagrams(word, max, min);
+    List<String> results = d.findAnagrams(word, max, min);
     long queryStopTime  = System.nanoTime();
     long queryDuration  = queryStopTime - queryStartTime;
     for (String s : results) {

@@ -1,86 +1,107 @@
+import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Queue;
+import java.util.PriorityQueue;
 
 /* This implementation stores a dictionary in a radix tree to quickly
  * find anagrams of given lengths.
  */
 public class Dictionary {
   private Node root;
-  private Set<String> searchResults;
+  private List<String> searchResults;
 
   public Dictionary() {
     root = new Node();
   }
 
-  /* Wrapper method for the real magic. Makes sure that input is
-   * okay, prepares the result set and starts off the recursive call
-   */
-  public Set<String> findAnagrams(String word, int maxLength, int minLength) {
-    searchResults = new HashSet<String>();
-    if (maxLength >= minLength) {
+  public List<String> findAnagrams(String word, int maxLength, int minLength) {
+    searchResults = new ArrayList<String>();
+
+    if (maxLength < minLength) {
       // Only do something if max >= min. Otherwise, just return empty.
-      // (it is pointless to do anything if max < min)
-      word = word.toLowerCase();
-      findAnagramsHelper(word, 0, maxLength, minLength, root);
+      return searchResults;
     }
+
+    int originalSize = word.length();
+
+    char[] ca = word.toCharArray();
+    Arrays.sort(ca);
+    List<Character> cl = new ArrayList<Character>();
+    for (char c : ca) {
+      cl.add(new Character(c));
+    }
+
+    Queue<PartialAnagram> pq = new PriorityQueue<PartialAnagram>();
+    PartialAnagram first = new PartialAnagram(cl, root);
+    pq.add(first);
+
+    while (!pq.isEmpty()) {
+      PartialAnagram pa = pq.poll();
+      Node n = pa.next;
+      List<Character> remaining = pa.remaining;
+
+      int stepsTaken = originalSize - remaining.size();
+      if (stepsTaken >= minLength && n.word != null) {
+        // 1) Have we reached a node with a result?
+        searchResults.add(n.word);
+      }
+
+      if (stepsTaken >= maxLength) {
+        // 2) If we shouldn't be stepping any longer, stop here.
+        continue;
+      }
+
+      // 3:
+      for (Character c : remaining) {
+        Node next = n.edges.get(c);
+        if (next != null) {
+          // TODO: write this comment
+          // Trim branches by only stepping into certain leaves
+          if (next.furthestLeaf < (minLength - stepsTaken)) {
+            // Skip this node
+            continue;
+          }
+
+          if (next.closestLeaf > (maxLength - stepsTaken)) {
+            // dito
+            continue;
+          }
+
+          // Edge exists, step right this way!
+          // (but first, work out what part of the word to pass on)
+          List<Character> theRest = new ArrayList<Character>(remaining);
+          // Remove the first occurence of c in theRest
+          theRest.remove(c);
+          PartialAnagram newPA = new PartialAnagram(theRest, next);
+          pq.add(newPA);
+        }
+      }
+    }
+    
     return searchResults;
   }
 
-  /* This is where the magic happens.
-   * For every recursion ('step' here):
-   * 1) Have we reached a node holding a real word?
-   *  - if so, add it to the results
-   *
-   * 2) Have we stepped maxSteps times yet?
-   *  - if so, stop stepping
-   *
-   * 3) For every character in our incoming word:
-   *  - If we have an edge with this character's name on it:
-   *    - step across that edge to a new node, with word = (word - char)
-   *
-   * 4) No more matching characters? Return.
-   */
-  private void findAnagramsHelper(String word, int stepsTaken, int maxSteps, int minSteps, Node n) {
-    if (stepsTaken >= minSteps && n.word != null) {
-      // 1) Have we reached a node with a result?
-      searchResults.add(n.word);
+  private class PartialAnagram implements Comparable<PartialAnagram> {
+    private List<Character> remaining;
+    private Node            next;
+    
+    private PartialAnagram(List<Character> remaining, Node next) {
+      this.remaining = remaining;
+      this.next      = next;
     }
 
-    if (stepsTaken >= maxSteps) {
-      // 2) If we shouldn't be stepping any longer, stop here.
-      return;
-    }
-
-    // 3:
-    for (int i = 0; i < word.length(); i++) {
-      // For every character in our incoming word:
-      char   nextStep = word.charAt(i);
-      Node   next     = n.edges.get(new Character(nextStep));
-      if (next != null) {
-        // TODO: write this comment
-        // Trim branches by only stepping into certain leaves
-        if (next.furthestLeaf < (minSteps - stepsTaken)) {
-          // Skip this node
-          continue;
-        }
-
-        if (next.closestLeaf > (maxSteps - stepsTaken)) {
-          // dito
-          continue;
-        }
-
-        // Edge exists, step right this way!
-        // (but first, work out what part of the word to pass on)
-        String theRest  = removeCharAt(word, i);
-        findAnagramsHelper(theRest, stepsTaken + 1, maxSteps, minSteps, next);
+    public int compareTo(PartialAnagram other) {
+      if (other == null) {
+        return 1;
       }
-    }
 
-    // 4:
-    return;
+      return (other.remaining.size() - this.remaining.size());
+    }
   }
 
   // This helper function works as a complement to String.charAt,

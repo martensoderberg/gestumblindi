@@ -3,7 +3,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 
-import java.util.Set;
+import java.util.List;
 
 /* Some test cases for the Dictionary class.
  * Note that these extensively use the "exists" method, this is in order
@@ -72,7 +72,7 @@ public class DictionaryTest {
     // Find all words, 20 characters or less, that exist in the
     // dictionary and can be formed with the letters of the alphabet
     // (using each character at most once).
-    Set result = d.findAnagrams(alphabet, 20, 0);
+    List<String> result = d.findAnagrams(alphabet, 20, 0);
 
     assertTrue  (result.contains("what"));
     assertTrue  (result.contains("is"  ));
@@ -103,7 +103,7 @@ public class DictionaryTest {
     int max = 5;
     int min = 10;
     d.add("cheese");
-    Set<String> result = d.findAnagrams(word, max, min);
+    List<String> result = d.findAnagrams(word, max, min);
     assertTrue("max < min not handled correctly", result.isEmpty());
   }
 
