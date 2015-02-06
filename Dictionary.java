@@ -57,7 +57,9 @@ public class Dictionary {
       }
 
       // 3:
-      for (Character c : remaining) {
+      // pick c from _unique_ elements in remaining
+      Set<Character> uniqueRemaining = new HashSet<Character>(remaining);
+      for (Character c : uniqueRemaining) {
         Node next = n.edges.get(c);
         if (next != null) {
           // TODO: write this comment
