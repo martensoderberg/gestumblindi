@@ -37,15 +37,15 @@ public class Dictionary {
     int originalSize = word.length();
 
     // Convert the word into a list of characters.
-    char[] ca = word.toCharArray();
-    List<Character> cl = new ArrayList<Character>();
-    for (char c : ca) {
-      cl.add(new Character(c));
+    char[] chararray = word.toCharArray();
+    List<Character> charlist = new ArrayList<Character>();
+    for (char c : chararray) {
+      charlist.add(new Character(c));
     }
 
     // Set up the queue
     Queue<PartialAnagram> pq = new PriorityQueue<PartialAnagram>();
-    PartialAnagram first = new PartialAnagram(cl, root, 0);
+    PartialAnagram first = new PartialAnagram("", charlist, root);
     pq.add(first);
 
     // Set up is done, let the searching commence
@@ -84,11 +84,12 @@ public class Dictionary {
 
           // Edge exists, step right this way!
           // (but first, work out what part of the word to pass on)
-          List<Character> theRest = new ArrayList<Character>(remaining);
+          List<Character> newRemaining = new ArrayList<Character>(remaining);
           // Remove the first occurence of c in theRest
-          theRest.remove(c);
-          int cs = pa.charSum + c.charValue();
-          PartialAnagram newPA = new PartialAnagram(theRest, next, cs);
+          newRemaining.remove(c);
+          String newPartialWord = pa.partialWord + c;
+          PartialAnagram newPA =
+            new PartialAnagram(newPartialWord, newRemaining, next);
           pq.add(newPA);
         }
       }
@@ -215,16 +216,16 @@ public class Dictionary {
   // Since we would like our output to be sorted, we make that happen
   // here.
   private class PartialAnagram implements Comparable<PartialAnagram> {
+    private String          partialWord;
     private List<Character> remaining;
     private Node            next;
-    private int             charSum;
 
-    private PartialAnagram(List<Character> remaining,
-                           Node next,
-                           int charSum) {
-      this.remaining = remaining;
-      this.next      = next;
-      this.charSum   = charSum;
+    private PartialAnagram(String partialWord,
+                           List<Character> remaining,
+                           Node next) {
+      this.partialWord = partialWord;
+      this.remaining   = remaining;
+      this.next        = next;
     }
 
     // Sorting order:
@@ -239,8 +240,8 @@ public class Dictionary {
         return 1;
       } else if (other.remaining.size() < this.remaining.size()) {
         return -1;
-      } else { // They are equal
-        return this.charSum - other.charSum;
+      } else { // They are equally long -- compare alphabetically
+        return this.partialWord.compareTo(other.partialWord);
       }
     }
   }
