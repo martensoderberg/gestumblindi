@@ -60,6 +60,18 @@ public class Dictionary {
       char   nextStep = word.charAt(i);
       Node   next     = n.edges.get(new Character(nextStep));
       if (next != null) {
+        // TODO: write this comment
+        // Trim branches by only stepping into certain leaves
+        if (next.furthestLeaf < (minSteps - stepsTaken)) {
+          // Skip this node
+          continue;
+        }
+
+        if (next.closestLeaf > (maxSteps - stepsTaken)) {
+          // dito
+          continue;
+        }
+
         // Edge exists, step right this way!
         // (but first, work out what part of the word to pass on)
         String theRest  = removeCharAt(word, i);
@@ -109,19 +121,23 @@ public class Dictionary {
     addHelper(word, word, root);
   }
 
-  /* Add is pretty straightforward:
+  /* Recursive add function.
+   * Performs some nifty branch depth calculations in order to note the
+   * depth of every branch in existence.
+   *
    * 1) Step through the tree, creating nodes as necessary
    * 2) Once we've run out of characters in our word, we must be done
-   * 3) Store the whole word in the last node
+   * 3) Store the whole word in the last node and return 0
+   * 4) Note the depth in every node we pass
    */
-  private void addHelper(String word, String wholeWord, Node n) {
+  private int addHelper(String word, String wholeWord, Node n) {
     if (word.length() == 0) {
       // 2 & 3:
       // We have entered the whole word into the tree.
       // This last word should therefore store the full word.
       // This way, we know that this node represents a full word.
       n.word  = wholeWord;
-      return;
+      return 0;
     }
 
     // 1:
@@ -134,7 +150,18 @@ public class Dictionary {
       Character c  = new Character(head);
       n.edges.put(c, next);
     }
-    addHelper(tail, wholeWord, next);
+    int depth = 1 + addHelper(tail, wholeWord, next);
+
+    // 4:
+    if (next.closestLeaf > depth) {
+      next.closestLeaf = depth;
+    }
+
+    if (next.furthestLeaf < depth) {
+      next.furthestLeaf = depth;
+    }
+
+    return depth;
   }
 
   // Internal representation of a Node.
@@ -144,6 +171,8 @@ public class Dictionary {
   private class Node {
     private Map<Character, Node>  edges;
     private String                word;
+    private int                   closestLeaf;
+    private int                   furthestLeaf;
     
     private Node () {
       // Note: Character.hashCode() == Character.hashValue()
@@ -154,6 +183,13 @@ public class Dictionary {
       // node given by following "b" -> "a" -> "n" -> "a" should not give
       // a word result.
       this.word  = null;
+
+      // In order to save us some execution cycles, we can keep track
+      // of how deep the branch that starts at this node is!
+      // For example, if we only want to find anagrams of length > 10,
+      // it makes no sense to go down a branch with depth < 10.
+      this.closestLeaf  = Integer.MAX_VALUE;
+      this.furthestLeaf = 0;
     }
   }
 }
